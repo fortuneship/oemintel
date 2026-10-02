@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/layout :: headContent('Products')}"></th:block></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main>
+	<h1>Products <span class="muted" th:text="'(' + ${#lists.size(families)} + ' families)'"></span></h1>
+	<p class="muted" th:if="${#lists.isEmpty(families)}">
+		Nothing onboarded yet. Start a job from the <a th:href="@{/}">Jobs</a> page.
+	</p>
+	<table th:unless="${#lists.isEmpty(families)}" class="products">
+		<thead>
+		<tr><th></th><th>Family</th><th>Category</th><th>SKUs</th><th>Images</th><th>Documents</th><th>Flags</th><th>Review</th><th>Updated</th></tr>
+		</thead>
+		<tbody>
+		<tr th:each="f : ${families}">
+			<td class="thumb"><img th:if="${f.mainImage}" th:src="${f.mainImage}" alt="" loading="lazy" referrerpolicy="no-referrer"></td>
+			<td>
+				<a th:href="@{/products/{id}(id=${f.id})}" th:text="${f.name}">Roxtec GH frame</a>
+				<div class="muted small" th:text="${f.familyKey}">roxtec-gh-frame</div>
+			</td>
+			<td th:text="${f.category}">Rectangular frames</td>
+			<td th:text="${f.skus}">97</td>
+			<td th:text="${f.images}">53</td>
+			<td th:text="${f.documents}">48</td>
+			<td><span th:if="${f.flags > 0}" class="badge severity-WARNING" th:text="${f.flags}">1</span></td>
+			<td><span class="badge" th:text="${f.reviewStatus}">NEW</span></td>
+			<td class="muted" th:text="${#temporals.format(f.updatedAt, 'dd MMM HH:mm')}"></td>
+		</tr>
+		</tbody>
+	</table>
+</main>
+</body>
+</html>

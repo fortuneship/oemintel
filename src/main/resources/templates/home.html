@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/layout :: headContent('Jobs')}"></th:block></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main>
+	<h1>Onboarding jobs</h1>
+
+	<div class="alert alert-error" th:if="${error}" th:text="${error}">Error</div>
+
+	<section class="card">
+		<h2>Onboard Roxtec products from a list of family pages</h2>
+		<p class="muted">
+			One product family page per line. While Roxtec's crawl authorisation is <strong>pending</strong>, a run is
+			limited to <strong th:text="${maxUnauthorised}">20</strong> families. Pages are fetched politely: robots.txt
+			is respected and requests are at least 3 seconds apart, so 15 families take about a minute.
+		</p>
+		<form method="post" th:action="@{/jobs}">
+			<textarea name="seedUrls" rows="10" th:text="${seedUrls}"></textarea>
+			<button type="submit" class="primary">Start onboarding</button>
+		</form>
+	</section>
+
+	<section class="card">
+		<h2>Recent jobs</h2>
+		<p class="muted" th:if="${#lists.isEmpty(jobs)}">No jobs yet.</p>
+		<table th:unless="${#lists.isEmpty(jobs)}">
+			<thead>
+			<tr><th>#</th><th>OEM</th><th>Mode</th><th>Status</th><th>Limit</th><th>Families</th><th>Work done</th><th>Failed</th><th>Created</th></tr>
+			</thead>
+			<tbody>
+			<tr th:each="j : ${jobs}">
+				<td><a th:href="@{/jobs/{id}(id=${j.id})}" th:text="${j.id}">1</a></td>
+				<td th:text="${j.oem}">ROXTEC</td>
+				<td th:text="${j.mode}">SEED_LIST</td>
+				<td><span class="badge" th:classappend="${'status-' + j.status}" th:text="${j.status}">RUNNING</span></td>
+				<td th:text="${j.limitValue + ' ' + j.limitUnit}">15 FAMILY</td>
+				<td th:text="${j.families}">0</td>
+				<td th:text="${j.finishedItems + ' / ' + j.totalItems}">0 / 0</td>
+				<td th:text="${j.deadItems}">0</td>
+				<td th:text="${#temporals.format(j.createdAt, 'dd MMM HH:mm')}">01 Oct 09:00</td>
+			</tr>
+			</tbody>
+		</table>
+	</section>
+</main>
+</body>
+</html>

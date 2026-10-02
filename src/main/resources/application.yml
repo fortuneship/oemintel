@@ -1,0 +1,57 @@
+server:
+  port: ${OEMINTEL_PORT:8090}
+  # No login until the dashboard's security step: only reachable from this machine.
+  address: ${OEMINTEL_ADDRESS:127.0.0.1}
+
+spring:
+  application:
+    name: oemintel
+  datasource:
+    url: ${OEMINTEL_DB_URL:jdbc:postgresql://localhost:5435/oemintel}
+    username: ${OEMINTEL_DB_USER:oemintel}
+    password: ${OEMINTEL_DB_PASSWORD:oemintel}
+    hikari:
+      # Workers hold no connection during I/O, but leave headroom for the dashboard and the engine's own queries.
+      maximum-pool-size: 20
+  flyway:
+    locations: classpath:db/migration
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+oemintel:
+  engine:
+    enabled: true
+    poll-interval: 1s
+    reaper-interval: 30s
+    evaluator-interval: 10s
+    stall-after: 15m
+    shutdown-grace: 20s
+    lanes:
+      # NETWORK is further limited to one request in flight per host.
+      network-concurrency: 4
+      local-concurrency: 4
+      llm-concurrency: 3
+    retry:
+      base-delay: 30s
+      max-delay: 30m
+      jitter: 0.2
+      host-blocked-delay: 15m
+
+  fetch:
+    user-agent: OEMIntelBot/0.1
+    # Contact (URL or email) appended to the User-Agent so site owners can reach you instead of blocking.
+    # Left empty until you decide what to publish.
+    contact: ${OEMINTEL_CRAWL_CONTACT:}
+    default-delay: 3s
+  storage:
+    root: ${OEMINTEL_STORAGE_ROOT:data/blobs}

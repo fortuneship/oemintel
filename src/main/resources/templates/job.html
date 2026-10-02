@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:replace="~{fragments/layout :: headContent('Job ' + ${job.id})}"></th:block>
+	<meta th:if="${active}" http-equiv="refresh" content="3">
+</head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main>
+	<h1>
+		Job <span th:text="${job.id}">1</span>
+		<span class="badge" th:classappend="${'status-' + job.status}" th:text="${job.status}">RUNNING</span>
+	</h1>
+	<p class="muted">
+		<span th:text="${job.mode}">SEED_LIST</span> · limit <span th:text="${job.limitValue + ' ' + job.limitUnit}">15 FAMILY</span>
+		· locale <span th:text="${job.locale}">en</span>
+		<span th:if="${active}"> · this page refreshes every 3 seconds</span>
+	</p>
+	<div class="alert alert-error" th:if="${error}" th:text="${error}">Error</div>
+	<form th:if="${active}" method="post" th:action="@{/jobs/{id}/cancel(id=${job.id})}">
+		<button type="submit">Cancel job</button>
+	</form>
+
+	<div class="grid-2">
+		<section class="card">
+			<h2>Pipeline</h2>
+			<table>
+				<thead><tr><th>Stage</th><th>Status counts</th></tr></thead>
+				<tbody>
+				<tr th:each="entry : ${progress.itemsByTypeAndStatus}">
+					<td th:text="${entry.key}">FETCH_PAGE</td>
+					<td>
+						<span th:each="s : ${entry.value}" class="badge" th:classappend="${'item-' + s.key}"
+							  th:text="${s.key + ' ' + s.value}">DONE 3</span>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</section>
+		<section class="card">
+			<h2>Timeline</h2>
+			<ul class="timeline">
+				<li th:each="e : ${progress.recentEvents}" th:classappend="${'level-' + e.level}">
+					<span class="muted" th:text="${#temporals.format(e.at, 'HH:mm:ss')}">09:00:00</span>
+					<span th:text="${e.message}">Created</span>
+				</li>
+			</ul>
+		</section>
+	</div>
+
+	<section class="card">
+		<h2>Products in this job</h2>
+		<table>
+			<thead><tr><th>Page</th><th>Status</th><th>SKUs</th><th>Product</th><th>Reason</th></tr></thead>
+			<tbody>
+			<tr th:each="c : ${candidates}">
+				<td class="url"><a th:href="${c.url}" target="_blank" rel="noopener" th:text="${c.url}">url</a></td>
+				<td><span class="badge" th:classappend="${'cand-' + c.status}" th:text="${c.status}">ADMITTED</span></td>
+				<td th:text="${c.skuCount}">-</td>
+				<td><a th:if="${c.familyId}" th:href="@{/products/{id}(id=${c.familyId})}" th:text="${c.familyName}">name</a></td>
+				<td class="muted" th:text="${c.reason}"></td>
+			</tr>
+			</tbody>
+		</table>
+	</section>
+
+	<section class="card" th:unless="${#lists.isEmpty(errors)}">
+		<h2>Problems</h2>
+		<table>
+			<thead><tr><th>Stage</th><th>Status</th><th>Class</th><th>Error</th><th>Target</th></tr></thead>
+			<tbody>
+			<tr th:each="e : ${errors}">
+				<td th:text="${e.taskType}"></td><td th:text="${e.status}"></td><td th:text="${e.errorClass}"></td>
+				<td th:text="${e.error}"></td><td class="url" th:text="${e.target}"></td>
+			</tr>
+			</tbody>
+		</table>
+	</section>
+</main>
+</body>
+</html>

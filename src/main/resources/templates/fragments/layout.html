@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:fragment="headContent(title)">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title th:text="${title} + ' · OEM Intel'">OEM Intel</title>
+		<link rel="stylesheet" th:href="@{/css/app.css}">
+	</th:block>
+</head>
+<body>
+<header th:fragment="nav" class="topbar">
+	<a class="brand" th:href="@{/}">OEM Intel</a>
+	<nav>
+		<a th:href="@{/}">Jobs</a>
+		<a th:href="@{/products}">Products</a>
+	</nav>
+	<span class="env">local · no login yet</span>
+</header>
+</body>
+</html>

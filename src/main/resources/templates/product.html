@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><th:block th:replace="~{fragments/layout :: headContent(${p.header.name})}"></th:block></head>
+<body>
+<header th:replace="~{fragments/layout :: nav}"></header>
+<main th:with="h=${p.header}">
+	<p class="muted"><a th:href="@{/products}">Products</a> /</p>
+	<h1 th:text="${h.name}">Roxtec GH frame</h1>
+	<p class="muted">
+		<span th:text="${h.familyKey}">roxtec-gh-frame</span> ·
+		<span class="badge" th:text="${h.reviewStatus}">NEW</span> ·
+		revision <span th:text="${h.revisionNumber}">1</span>, extracted
+		<span th:text="${#temporals.format(h.extractedAt, 'dd MMM yyyy HH:mm')}"></span>
+		by <span th:text="${h.extractorVersion}">roxtec-0.1</span> ·
+		<a th:href="${h.canonicalUrl}" target="_blank" rel="noopener">open on roxtec.com</a>
+	</p>
+
+	<section class="card" th:unless="${#lists.isEmpty(p.flags) and #lists.isEmpty(warnings)}">
+		<h2>Needs attention</h2>
+		<ul>
+			<li th:each="f : ${p.flags}"><span class="badge" th:classappend="${'severity-' + f.severity}" th:text="${f.type}"></span>
+				<span th:text="${f.message}"></span></li>
+			<li th:each="w : ${warnings}" class="muted" th:text="${w}"></li>
+		</ul>
+	</section>
+
+	<section class="card">
+		<h2>Family</h2>
+		<table class="values">
+			<tbody>
+			<tr th:each="v : ${p.familyValues}">
+				<th th:text="${v.label}">Name</th>
+				<td th:text="${v.value}">value</td>
+				<td class="source"><span class="badge source" th:text="${v.source}"
+										 th:title="${v.locator + '&#10;' + v.excerpt}">JSON_LD</span></td>
+			</tr>
+			</tbody>
+		</table>
+	</section>
+
+	<section class="card">
+		<h2>Articles (SKUs) <span class="muted" th:text="'· ' + ${#lists.size(p.variants.rows)}"></span></h2>
+		<p class="muted small">
+			Hover a value to see where it came from. <span class="corroborated">Underlined</span> values were found by two
+			sources that agree. A cell with two values means the sources disagree.
+		</p>
+		<div class="matrix-wrap">
+			<table class="matrix">
+				<thead>
+				<tr>
+					<th class="sticky">Article</th>
+					<th>SKU</th>
+					<th th:each="c : ${p.variants.columns}" th:text="${c}">Weight (kg)</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="r : ${p.variants.rows}">
+					<td class="sticky" th:text="${r.label}">GH 2x1 GALV</td>
+					<td class="sku" th:text="${r.sku}">5GH0000008110</td>
+					<td th:each="c : ${p.variants.columns}">
+						<th:block th:if="${r.cells.containsKey(c)}">
+							<div th:each="cell : ${r.cells.get(c)}" th:text="${cell.value}"
+								 th:classappend="${cell.corroborations > 0} ? 'corroborated'"
+								 th:title="${cell.source + ' · ' + cell.locator + '&#10;' + cell.excerpt}">3.18</div>
+						</th:block>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="card" th:unless="${#lists.isEmpty(p.images)}">
+		<h2>Images <span class="muted" th:text="'· ' + ${#lists.size(p.images)}"></span></h2>
+		<p class="muted small">Shown directly from Roxtec's CDN for review; nothing is downloaded or republished yet.</p>
+		<div class="gallery">
+			<figure th:each="img, stat : ${p.images}" th:if="${stat.index < 24}">
+				<img th:src="${img.url}" alt="" loading="lazy" referrerpolicy="no-referrer">
+				<figcaption>
+					<span class="badge" th:text="${img.role}">MAIN_IMAGE</span>
+					<span class="small" th:text="${img.variantSku ?: img.title}"></span>
+				</figcaption>
+			</figure>
+		</div>
+		<p class="muted small" th:if="${#lists.size(p.images) > 24}"
+		   th:text="'Showing 24 of ' + ${#lists.size(p.images)} + ' images.'"></p>
+	</section>
+
+	<section class="card" th:unless="${#lists.isEmpty(p.documents)}">
+		<h2>Documents <span class="muted" th:text="'· ' + ${#lists.size(p.documents)}"></span></h2>
+		<table>
+			<thead><tr><th>Type</th><th>Title</th><th>Download status</th></tr></thead>
+			<tbody>
+			<tr th:each="d : ${p.documents}">
+				<td><span class="badge" th:text="${d.role}">CERTIFICATE</span></td>
+				<td><a th:href="${d.url}" target="_blank" rel="noopener" th:text="${d.title}">title</a></td>
+				<td class="muted" th:text="${d.status}">PENDING</td>
+			</tr>
+			</tbody>
+		</table>
+	</section>
+
+	<section class="card">
+		<h2>Source</h2>
+		<p class="small">
+			Fetched <span th:text="${#temporals.format(h.fetchedAt, 'dd MMM yyyy HH:mm')}"></span> from
+			<a th:href="${h.sourceUrl}" target="_blank" rel="noopener" th:text="${h.sourceUrl}"></a>
+		</p>
+	</section>
+</main>
+</body>
+</html>
